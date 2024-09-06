@@ -14,6 +14,8 @@ import (
 func main() {
 	//Conexion a la DB
 	database.Connect()
+	//AutoMigarte Models
+	database.Migarte()
 	//Genero Router
 	r := gin.Default()
 

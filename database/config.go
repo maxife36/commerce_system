@@ -1,6 +1,7 @@
 package database
 
 import (
+	"commerce-system/models"
 	"fmt"
 	"log"
 	"os"
@@ -31,4 +32,26 @@ func Connect() {
 	}
 
 	fmt.Println("Conexion a DB Exitosa")
+}
+
+func Migarte() {
+
+	err := db.AutoMigrate(
+		&models.Brand{},
+		&models.Category{},
+		&models.Product{},
+		&models.ProductSupplier{},
+		&models.Purchase{},
+		&models.Role{},
+		&models.Sale{},
+		&models.SaleDetail{},
+		&models.Supplier{},
+		&models.User{},
+	)
+
+	if err != nil {
+		log.Fatalln("Se produjo un error en las migraciones de modelos a la DB")
+	}
+
+	log.Println("Migracion exitosa")
 }
