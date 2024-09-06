@@ -14,4 +14,5 @@ type User struct {
 	Address  string `json:"address"`
 	RoleId   uint   `json:"-"`
 	Role     Role   `json:"role"`
+	Sales    []Sale `json:"sales"`
 }
