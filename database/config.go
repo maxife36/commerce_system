@@ -55,3 +55,7 @@ func Migarte() {
 
 	log.Println("Migracion exitosa")
 }
+
+func GetDB() *gorm.DB {
+	return db
+}
