@@ -4,5 +4,6 @@ import "gorm.io/gorm"
 
 type Brand struct {
 	gorm.Model
-	Brand string `json:"brand"`
+	Brand    string    `json:"brand"`
+	Products []Product `json:"products"`
 }
