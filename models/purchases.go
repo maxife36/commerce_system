@@ -11,7 +11,7 @@ type Purchase struct {
 	Details    json.RawMessage `json:"details" gorm:"type:json"`
 	Amount     float64         `json:"amount" gorm:"type:decimal(10,2)"`
 	UserId     uint            `json:"-"`
-	User       User            `json:"user"`
+	User       User            `json:"user" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	SupplierId uint            `json:"-"`
-	Supplier   Supplier        `json:"supplier"`
+	Supplier   Supplier        `json:"supplier" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }

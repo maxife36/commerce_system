@@ -13,6 +13,6 @@ type User struct {
 	Phone    uint16 `json:"phone"`
 	Address  string `json:"address"`
 	RoleId   uint   `json:"-"`
-	Role     Role   `json:"role"`
-	Sales    []Sale `json:"sales"`
+	Role     Role   `json:"role" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Sales    []Sale `json:"sales" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }

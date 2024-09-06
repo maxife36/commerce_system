@@ -9,7 +9,7 @@ type SaleDetail struct {
 	Price      float64  `json:"price" gorm:"type:decimal(10,2)"`
 	Quantity   int      `json:"quantity"`
 	CategoryId uint     `json:"-"`
-	Category   Category `json:"category"`
+	Category   Category `json:"category" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	BrandId    uint     `json:"-"`
-	Brand      Brand    `json:"brand"`
+	Brand      Brand    `json:"brand" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
