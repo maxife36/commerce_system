@@ -8,7 +8,7 @@ type User struct {
 	LastName string `json:"last_name"`
 	Username string `json:"username" gorm:"unique;not null"`
 	Password string `json:"-" gorm:"not null"`
-	Dni      uint16 `json:"dni" gorm:"unique"`
+	Dni      uint16 `json:"dni" gorm:"unique;not null"`
 	Email    string `json:"email" gorm:"unique"`
 	Phone    uint16 `json:"phone"`
 	Address  string `json:"address"`
