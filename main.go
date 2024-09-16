@@ -2,7 +2,6 @@ package main
 
 import (
 	"commerce-system/api/routes"
-	"commerce-system/database"
 	"fmt"
 	"log"
 	"os"
@@ -11,11 +10,19 @@ import (
 	"github.com/joho/godotenv"
 )
 
+var addr string
+
+func init() {
+
+	//Cargo varibales de entorno
+	if err := godotenv.Load(); err != nil {
+		fmt.Println("Not .env loaded")
+	}
+	//Recupero Variable de Entorno
+	addr = os.Getenv("SERVER_ADDRESS")
+}
+
 func main() {
-	//Conexion a la DB
-	database.Connect()
-	//AutoMigarte Models
-	database.Migarte()
 	//Genero Router
 	r := gin.Default()
 
@@ -24,11 +31,5 @@ func main() {
 
 	routes.UsersRoutes(app)
 
-	//Cargo varibales de entorno
-	if err := godotenv.Load(); err != nil {
-		fmt.Println("Not .env loaded")
-	}
-	//Recupero Variable de Entorno y levanto servidor
-	ADDR := os.Getenv("SERVER_ADDRESS")
-	log.Fatalln(r.Run(ADDR))
+	log.Fatalln(r.Run(addr))
 }
