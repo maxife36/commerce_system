@@ -3,6 +3,7 @@ package helpers
 import (
 	"errors"
 	"reflect"
+	"strconv"
 )
 
 func FilterStruct(obj map[string]any, notAllowedAttr ...string) *map[string]any {
@@ -45,4 +46,14 @@ func extractFields(t reflect.Type, save map[string]reflect.Type) {
 
 		save[field.Name] = field.Type
 	}
+}
+
+func strToUint(value string) (uint, error) {
+	valueUint64, err := strconv.ParseUint(value, 10, 64)
+
+	if err != nil {
+		return uint(valueUint64), err
+	}
+
+	return uint(valueUint64), nil
 }
