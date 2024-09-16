@@ -27,17 +27,30 @@ type Repository[M Models] interface {
 }
 
 type Models interface {
-	models.Category | models.Sale | models.User | models.Product
+	models.Category | models.Sale | models.User | models.Product | models.Brand | models.ProductSupplier | models.Purchase | models.Role | models.SaleDetail | models.Supplier
 }
 
+type Operator string
+
+const (
+	OperatorLike Operator = "like"
+	OperatorEq   Operator = "eq"
+	OperatorNeq  Operator = "neq"
+	OperatorLt   Operator = "lt"
+	OperatorLte  Operator = "lte"
+	OperatorGt   Operator = "gt"
+	OperatorGte  Operator = "gte"
+)
+
 type FilterConditions struct {
-	Operator string //(like, eq, neq, lt, lte, gt, gte )
+	Operator Operator
 	value    any
 }
 
 type baseModelDao[M Models] struct {
-	Model  M
-	Filter map[string][]FilterConditions
+	Model   M
+	Filter  map[string][]FilterConditions
+	Details bool
 }
 
 func NewDao[M Models](model M) *baseModelDao[M] {
@@ -59,7 +72,18 @@ func (md *baseModelDao[M]) Create() (*M, error) {
 func (md *baseModelDao[M]) GetAll() ([]M, error) {
 	var records []M
 
-	result := db.Find(&records)
+	var err error
+	query := db.Model(&md.Model)
+
+	if md.Details {
+		query, err = queryDetailsConfig[M](query, md.Model)
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	result := query.Find(&records)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -74,7 +98,18 @@ func (md *baseModelDao[M]) GetById() (*M, error) {
 		return nil, errors.New("not valid ID")
 	}
 
-	result := db.First(&md.Model)
+	var err error
+	query := db.Model(&md.Model)
+
+	if md.Details {
+		query, err = queryDetailsConfig[M](query, md.Model)
+
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	result := query.First(&md.Model)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -98,11 +133,19 @@ func (md *baseModelDao[M]) GetByFilter() ([]M, error) {
 
 	var records []M
 
-	query := db.Model(md.Model)
+	query := db.Model(&md.Model)
+
+	if md.Details {
+		query, err = queryDetailsConfig[M](query, md.Model)
+
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	for field, conditions := range md.Filter {
 		if fieldType, exists := allAttr[field]; exists {
-			query, err = queryConfig(query, field, fieldType, conditions)
+			query, err = queryFilterConfig(query, field, fieldType, conditions)
 
 			if err != nil {
 				return nil, err
@@ -147,12 +190,12 @@ func (md *baseModelDao[M]) Delete() (*int64, error) {
 	return &result.RowsAffected, nil
 }
 
-func queryConfig(db *gorm.DB, field string, fieldType reflect.Type, conditions []FilterConditions) (*gorm.DB, error) {
+func queryFilterConfig(query *gorm.DB, field string, fieldType reflect.Type, conditions []FilterConditions) (*gorm.DB, error) {
 	for _, cond := range conditions {
 
 		var queryStr string
 
-		allowedOperators := map[string]string{
+		allowedOperators := map[Operator]string{
 			"like": "LIKE",
 			"eq":   "=",
 			"neq":  "!=",
@@ -173,11 +216,31 @@ func queryConfig(db *gorm.DB, field string, fieldType reflect.Type, conditions [
 				return nil, fmt.Errorf("on field %s: expected %s, obteined %s", field, fieldType, valueType)
 			}
 
-			db = db.Where(queryStr, cond.value)
+			query = query.Where(queryStr, cond.value)
 		}
 	}
 
-	return db, nil
+	return query, nil
+}
+
+func queryDetailsConfig[M Models](query *gorm.DB, model M) (*gorm.DB, error) {
+
+	val := reflect.ValueOf(model)
+
+	if val.Kind() != reflect.Ptr {
+		return nil, errors.New("not struct provided")
+	}
+
+	for i := 0; i < val.NumField(); i++ {
+		field := val.Type().Field(i)
+		fieldValue := val.Field(i)
+
+		if fieldValue.Kind() == reflect.Slice || fieldValue.Kind() == reflect.Struct {
+			query = query.Preload(field.Name)
+		}
+	}
+
+	return query, nil
 }
 
 func idChecker[M Models](model M) bool {
