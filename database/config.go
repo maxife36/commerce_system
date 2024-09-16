@@ -13,28 +13,11 @@ import (
 
 var db *gorm.DB
 
-func Connect() {
-	if err := godotenv.Load(); err != nil {
-		log.Fatal("Error al cargar variables de Entorno")
-	}
-
-	var err error
-	username := os.Getenv("DB_USERNAME")
-	pass := os.Getenv("DB_PASS")
-	host := os.Getenv("DB_HOST")
-	port := os.Getenv("DB_PORT")
-	dbName := os.Getenv("DB_NAME")
-
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", username, pass, host, port, dbName)
-
-	if db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{}); err != nil {
-		log.Fatalf("Error al conectar con DB: %s", err)
-	}
-
-	fmt.Println("Conexion a DB Exitosa")
+func GetDB() *gorm.DB {
+	return db
 }
 
-func Migarte() {
+func migrate() {
 
 	err := db.AutoMigrate(
 		&models.Brand{},
@@ -56,6 +39,25 @@ func Migarte() {
 	log.Println("Migracion exitosa")
 }
 
-func GetDB() *gorm.DB {
-	return db
+func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Fatal("Error al cargar variables de Entorno")
+	}
+
+	var err error
+	username := os.Getenv("DB_USERNAME")
+	pass := os.Getenv("DB_PASS")
+	host := os.Getenv("DB_HOST")
+	port := os.Getenv("DB_PORT")
+	dbName := os.Getenv("DB_NAME")
+
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", username, pass, host, port, dbName)
+
+	if db, err = gorm.Open(mysql.Open(dsn), &gorm.Config{}); err != nil {
+		log.Fatalf("Error al conectar con DB: %s", err)
+	}
+
+	fmt.Println("Conexion a DB Exitosa")
+
+	migrate()
 }
