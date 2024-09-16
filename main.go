@@ -10,21 +10,26 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func main() {
-	//Genero Router
-	r := gin.Default()
+var addr string
+
+func init() {
 
 	//Cargo varibales de entorno
 	if err := godotenv.Load(); err != nil {
 		fmt.Println("Not .env loaded")
 	}
+	//Recupero Variable de Entorno
+	addr = os.Getenv("SERVER_ADDRESS")
+}
+
+func main() {
+	//Genero Router
+	r := gin.Default()
 
 	//agrupo rutas
 	app := r.Group("/api")
 
 	routes.UsersRoutes(app)
 
-	//Recupero Variable de Entorno y levanto servidor
-	ADDR := os.Getenv("SERVER_ADDRESS")
-	log.Fatalln(r.Run(ADDR))
+	log.Fatalln(r.Run(addr))
 }
