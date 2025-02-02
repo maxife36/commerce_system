@@ -27,7 +27,7 @@ type Repository[M Models] interface {
 }
 
 type Models interface {
-	models.Category | models.Sale | models.User | models.Product | models.Brand | models.ProductSupplier | models.Purchase | models.Role | models.SaleDetail | models.Supplier
+	models.Brand | models.Category | models.Client | models.Combo | models.ComboDetails | models.Product | models.Production | models.ProductionDetails | models.Purchase | models.PurchaseDetails | models.Role | models.Sale | models.SaleDetails | models.Supplier | models.User
 }
 
 type Operator string
